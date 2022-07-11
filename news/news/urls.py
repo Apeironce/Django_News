@@ -20,8 +20,8 @@ from news import settings
 from blog.views import *
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('', include('blog.urls')),
+    path('admin/', admin.site.urls),
 ]
 
 handler404 = page_not_found

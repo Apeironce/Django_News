@@ -1,23 +1,23 @@
 from django.http import HttpResponse, HttpResponseNotFound, Http404
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+
+from blog.forms import AddPostForm
 from blog.models import *
 
-menu = [['Главная', '/'], ['Архив', '/archive/2022/'], ['О сайте', '/about/'], ['Добавить статью', '/'], ['Войти', '/']]
+menu = [{'title': 'Главная', 'url_name': 'home'},
+        {'title': 'О сайте', 'url_name': 'about'},
+        {'title': 'Добавить статью', 'url_name': 'add_page'},
+        {'title': 'Войти', 'url_name': 'login'}
+        ]
 
 
-def home(request, cat_id):
+def home(request):
     posts = Post.objects.all()
-    cats = Category.objects.all()
-
-    if len(posts) == 0:
-        raise Http404
-
     context = {
         'menu': menu,
         'posts': posts,
-        'cats': cats,
         'title': 'Главная страница',
-        'cat_selected': cat_id,
+        'cat_selected': 0,
     }
 
     return render(request, 'blog/home.html', context=context)
@@ -40,7 +40,42 @@ def archive(request, year):
 
 
 def show_category(request, cat_id):
-    return HttpResponse(f"Отображение категории с oid = {cat_id}")
+    posts = Post.objects.filter(cat_id=cat_id)
+    context = {
+        'menu': menu,
+        'posts': posts,
+        'title': 'Отображение по категориям',
+        'cat_selected': cat_id,
+    }
+
+    return render(request, 'blog/home.html', context=context)
+
+
+def show_post(request, post_slug):
+    post = get_object_or_404(Post, pk=post_slug)
+    context = {
+        'menu': menu,
+        'posts': post,
+        'title': post.title,
+        'cat_selected': post.cat_id,
+    }
+
+    return render(request, 'blog/post.html', context=context)
+
+
+def addpage(request):
+    if request.method == 'POST':
+        form = AddPostForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = AddPostForm()
+    return render(request, 'blog/addpage.html', {'form': form, 'menu': menu, 'title': 'Добавление статьи'})
+
+
+def login(request):
+    return HttpResponse("Авторизация")
 
 
 def page_not_found(request, exception):
