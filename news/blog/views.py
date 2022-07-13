@@ -11,7 +11,6 @@ from blog.utils import DataMixin
 
 menu = [{'title': 'О сайте', 'url_name': 'about'},
         {'title': 'Добавить статью', 'url_name': 'add_page'},
-        {'title': 'Обратная связь', 'url_name': 'add_page'},
         ]
 
 
@@ -81,33 +80,33 @@ def archive(request, year):
     return render(request, 'blog/archive.html', {'menu': menu, 'year': year, 'title': f'Архив за {year} год'})
 
 
-class PostCategory(ListView):
-    model = Post
-    template_name = 'blog/home.html'
-    context_object_name = 'posts'
-    allow_empty = False
-
-    def get_queryset(self):
-        return Post.objects.filter(cat_slug=self.kwargs['cat_slug'], is_published=True)
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Категория - ' + str(context['posts'][0].cat)
-        context['menu'] = menu
-        context['cat_selected'] = context['posts'][0].cat_id
-        return context
-
-
-# def show_category(request, cat_id):
-#     posts = Post.objects.filter(cat_id=cat_id)
-#     context = {
-#         'menu': menu,
-#         'posts': posts,
-#         'title': 'Отображение по категориям',
-#         'cat_selected': cat_id,
-#     }
+# class PostCategory(ListView):
+#     model = Post
+#     template_name = 'blog/home.html'
+#     context_object_name = 'posts'
+#     allow_empty = False
 #
-#     return render(request, 'blog/home.html', context=context)
+#     def get_queryset(self):
+#         return Post.objects.filter(cat_id=self.kwargs['cat_id'], is_published=True)
+#
+#     def get_context_data(self, *, object_list=None, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['title'] = 'Категория - ' + str(context['posts'][0].cat)
+#         context['menu'] = menu
+#         context['cat_selected'] = context['posts'][0].cat_id
+#         return context
+
+
+def show_category(request, cat_id):
+    posts = Post.objects.filter(cat_id=cat_id, is_published=True)
+    context = {
+        'menu': menu,
+        'posts': posts,
+        'title': 'Отображение по категориям',
+        'cat_selected': cat_id,
+    }
+
+    return render(request, 'blog/home.html', context=context)
 
 
 class ShowPost(DataMixin, DetailView):
@@ -156,10 +155,6 @@ class AddPage(CreateView):
 #     else:
 #         form = AddPostForm()
 #     return render(request, 'blog/addpage.html', {'form': form, 'menu': menu, 'title': 'Добавление статьи'})
-
-
-def contact(request):
-    return HttpResponse("Контакты")
 
 
 def page_not_found(request, exception):
